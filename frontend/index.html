@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Customers</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+    <script src="config.js" defer></script>
+    <script src="utils.js" defer></script>
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Manage Customers</h1>
+
+      <!-- Form Tambah Pelanggan -->
+      <div class="add-customer">
+        <h2>Tambah Pelanggan</h2>
+        <input type="text" id="customerName" placeholder="Nama Pelanggan" />
+        <input type="text" id="customerPhone" placeholder="Nomor HP" />
+        <button id="addCustomerBtn">Tambah</button>
+      </div>
+
+      <!-- Form Pencarian -->
+      <div class="search-bar">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search name or WA number"
+        />
+        <select id="statusFilter">
+          <option value="">Semua Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <button id="searchBtn">Cari</button>
+      </div>
+
+      <!-- Tempat Daftar Pelanggan -->
+      <div class="customer-list" id="customerList"></div>
+    </div>
+  </body>
+</html>
