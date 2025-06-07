@@ -73,3 +73,82 @@ app.post("/customers", authMiddleware, (req, res) => {
   customers.push(newCustomer);
   res.status(201).json(newCustomer);
 });
+
+// Search pelanggan by name
+app.get("/customers/search", authMiddleware, (req, res) => {
+  const { name } = req.query;
+
+  if (!name || name.trim().length < 3) {
+    return res.status(400).json({ error: "Nama minimal 3 karakter." });
+  }
+
+  const result = customers.filter((c) =>
+    c.name.toLowerCase().includes(name.toLowerCase())
+  );
+
+  res.json(result);
+});
+
+// ---------------------- BILLS ------------------------
+app.post("/bills", authMiddleware, (req, res) => {
+  const { customerId, amount, dueDate } = req.body;
+
+  // Convert customerId to number if it's a string
+  const customerIdNum = parseInt(customerId);
+  const amountNum = parseFloat(amount);
+
+  if (
+    isNaN(customerIdNum) ||
+    isNaN(amountNum) ||
+    amountNum <= 0 ||
+    typeof dueDate !== "string" ||
+    !dueDate.match(/^\d{4}-\d{2}-\d{2}$/)
+  ) {
+    return res.status(400).json({ error: "Data tagihan tidak valid." });
+  }
+
+  const customer = customers.find((c) => c.id === customerIdNum);
+  if (!customer) {
+    return res.status(400).json({ error: "Pelanggan tidak ditemukan." });
+  }
+
+  const newBill = {
+    id: billIdCounter++,
+    customerId: customerIdNum,
+    amount: amountNum,
+    dueDate,
+    status: "unpaid",
+  };
+  bills.push(newBill);
+  res.status(201).json(newBill);
+});
+
+app.get("/bills", authMiddleware, (req, res) => {
+  const { customerId, status } = req.query;
+  let result = bills;
+
+  if (customerId) {
+    const idNum = parseInt(customerId);
+    if (isNaN(idNum)) {
+      return res.status(400).json({ error: "customerId harus angka." });
+    }
+    result = result.filter((b) => b.customerId === idNum);
+  }
+
+  const allowedStatus = ["paid", "unpaid"];
+  if (status && !allowedStatus.includes(status)) {
+    return res.status(400).json({ error: "Status harus paid atau unpaid." });
+  }
+
+  if (status) {
+    result = result.filter((b) => b.status === status);
+  }
+
+  // Tambahkan nama pelanggan ke hasil
+  const resultWithName = result.map((b) => {
+    const customer = customers.find((c) => c.id === b.customerId);
+    return {
+      ...b,
+      customerName: customer ? customer.name : "Unknown",
+    };
+  });

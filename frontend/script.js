@@ -233,3 +233,114 @@ document.addEventListener("DOMContentLoaded", () => {
     downloadReportBtn.addEventListener("click", downloadReportTXT);
   }
 });
+
+// Fungsi render pelanggan
+function renderCustomers(list) {
+  const container = document.getElementById("customerList");
+  if (!container) return;
+  
+  container.innerHTML = "";
+  if (!list.length) {
+    container.textContent = "Tidak ada pelanggan";
+    return;
+  }
+  list.forEach((c) => {
+    const div = document.createElement("div");
+    div.className = "customer";
+    div.textContent = ${c.name} - ${c.phone || '-'};
+    container.appendChild(div);
+  });
+}
+
+function loadCustomers() {
+  if (!adminToken) return;
+  
+  fetch(${API_BASE_URL}/customers, {
+    headers: { Authorization: adminToken },
+  })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("Gagal memuat pelanggan");
+      }
+      return res.json();
+    })
+    .then((data) => {
+      customers = data;
+      renderCustomers(customers);
+      fillCustomerDropdown();
+    })
+    .catch((error) => {
+      console.error("Load customers error:", error);
+      alert("Gagal memuat pelanggan");
+    });
+}
+
+function loadBills() {
+  if (!adminToken) return;
+  
+  fetch(${API_BASE_URL}/bills, {
+    headers: { Authorization: adminToken },
+  })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("Gagal memuat tagihan");
+      }
+      return res.json();
+    })
+    .then((bills) => {
+      renderBills(bills);
+    })
+    .catch((error) => {
+      console.error("Load bills error:", error);
+      alert("Gagal memuat tagihan");
+    });
+}
+
+function renderBills(bills) {
+  const container = document.getElementById("billList");
+  if (!container) return;
+  
+  container.innerHTML = "";
+  if (!bills.length) {
+    container.textContent = "Tidak ada tagihan";
+    return;
+  }
+  bills.forEach((b) => {
+    const div = document.createElement("div");
+    div.className = "bill";
+    div.innerHTML = `
+      <p><strong>Pelanggan:</strong> ${b.customerName || 'Unknown'}</p>
+      <p><strong>Jumlah:</strong> Rp ${b.amount.toLocaleString('id-ID')}</p>
+      <p><strong>Jatuh tempo:</strong> ${b.dueDate}</p>
+      <p><strong>Status:</strong> ${b.status === 'paid' ? 'Terbayar' : 'Belum Terbayar'}</p>
+      ${b.status === 'unpaid' ? <button onclick="payBill(${b.id})">Bayar</button> : ''}
+    `;
+    container.appendChild(div);
+  });
+}
+
+// Fungsi untuk membayar tagihan
+function payBill(billId) {
+  if (!adminToken) return;
+  
+  fetch(${API_BASE_URL}/bills/${billId}, {
+    method: 'PATCH',
+    headers: { Authorization: adminToken },
+  })
+    .then((res) => {
+      if (!res.ok) {
+        return res.json().then(err => {
+          throw new Error(err.error || "Gagal membayar tagihan");
+        });
+      }
+      return res.json();
+    })
+    .then(() => {
+      alert("Tagihan berhasil dibayar");
+      loadBills(); // Refresh the bills list
+    })
+    .catch((error) => {
+      console.error("Pay bill error:", error);
+      alert(error.message || "Gagal membayar tagihan");
+    });
+}
