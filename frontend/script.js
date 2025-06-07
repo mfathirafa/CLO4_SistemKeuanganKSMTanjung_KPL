@@ -344,3 +344,160 @@ function payBill(billId) {
       alert(error.message || "Gagal membayar tagihan");
     });
 }
+
+function loadHistory() {
+  if (!adminToken) return;
+  
+  fetch(`${API_BASE_URL}/payments/history`, {
+    headers: { Authorization: adminToken },
+  })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("Gagal memuat riwayat pembayaran");
+      }
+      return res.json();
+    })
+    .then((history) => {
+      renderHistory(history);
+    })
+    .catch((error) => {
+      console.error("Load history error:", error);
+      alert("Gagal memuat riwayat pembayaran");
+    });
+}
+
+function renderHistory(history) {
+  const container = document.getElementById("historyList");
+  if (!container) return;
+  
+  container.innerHTML = "";
+  if (!history.length) {
+    container.textContent = "Tidak ada riwayat pembayaran";
+    return;
+  }
+  history.forEach((item) => {
+    const div = document.createElement("div");
+    div.className = "history-item";
+    div.innerHTML = `
+      <p><strong>Pelanggan:</strong> ${item.customerName || 'Unknown'}</p>
+      <p><strong>Jumlah:</strong> Rp ${item.amount.toLocaleString('id-ID')}</p>
+      <p><strong>Tanggal:</strong> ${item.date}</p>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function downloadHistoryCSV() {
+  if (!adminToken) return;
+  
+  fetch(`${API_BASE_URL}/payments/history`, {
+    headers: { Authorization: adminToken },
+  })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("Gagal memuat riwayat pembayaran");
+      }
+      return res.json();
+    })
+    .then((history) => {
+      if (!history.length) {
+        alert("Tidak ada riwayat untuk diunduh");
+        return;
+      }
+      const csvHeader = "Customer Name,Amount,Date\n";
+      const csvRows = history
+        .map((h) => `"${h.customerName}",${h.amount},"${h.date}"`)
+        .join("\n");
+      const csvContent = csvHeader + csvRows;
+      const blob = new Blob([csvContent], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "payment_history.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    })
+    .catch((error) => {
+      console.error("Download history error:", error);
+      alert("Gagal unduh riwayat pembayaran");
+    });
+}
+
+function loadReport() {
+  if (!adminToken) return;
+  
+  fetch(`${API_BASE_URL}/report`, {
+    headers: { Authorization: adminToken },
+  })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("Gagal memuat laporan");
+      }
+      return res.text();
+    })
+    .then((reportText) => {
+      const reportBox = document.getElementById("reportBox");
+      if (reportBox) {
+        reportBox.textContent = reportText;
+      }
+    })
+    .catch((error) => {
+      console.error("Load report error:", error);
+      alert("Gagal memuat laporan");
+    });
+}
+
+function searchCustomer(name) {
+  if (!adminToken || !name || name.length < 3) {
+    return;
+  }
+  
+  fetch(`${API_BASE_URL}/customers/search?name=${encodeURIComponent(name)}`, {
+    method: "GET",
+    headers: {
+      Authorization: adminToken,
+    },
+  })
+    .then((res) => {
+      if (!res.ok) {
+        return res.json().then(err => {
+          throw new Error(err.error || "Gagal mencari pelanggan");
+        });
+      }
+      return res.json();
+    })
+    .then((data) => {
+      renderCustomers(data);
+    })
+    .catch((error) => {
+      console.error("Search customer error:", error);
+      alert(error.message || "Gagal mencari pelanggan");
+    });
+}
+
+function downloadReportTXT() {
+  if (!adminToken) return;
+  
+  fetch(`${API_BASE_URL}/report`, {
+    headers: { Authorization: adminToken },
+  })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("Gagal memuat laporan");
+      }
+      return res.text();
+    })
+    .then((reportText) => {
+      const blob = new Blob([reportText], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "report.txt";
+      a.click();
+      URL.revokeObjectURL(url);
+    })
+    .catch((error) => {
+      console.error("Download report error:", error);
+      alert("Gagal unduh laporan");
+    });
+}
