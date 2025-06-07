@@ -1,18 +1,175 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  padding: 20px;
+  margin: 0;
+  color: #333;
+}
+
+.container {
+  max-width: 800px;
+  margin: auto;
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  color: #444;
+}
+
+form input,
+form select,
+form button,
+#login-section input,
+.add-customer input,
+.add-bill input,
+.search-bar input,
+.search-bar select {
+  margin: 5px 0;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+#login-section input {
+  width: 80%;
+  max-width: 300px;
+  margin: 10px auto;
+  display: block;
+}
+
+button,
+#login-section button {
+  padding: 8px 14px;
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover,
+#login-section button:hover {
+  background-color: #1976d2;
+}
+
+#logoutBtn {
+  margin-bottom: 20px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  float: right;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+#logoutBtn:hover {
+  background-color: #d32f2f;
+}
+
+#login-section {
+  text-align: center;
+}
+
+#loginError {
+  margin-top: 10px;
+  color: red;
+  font-weight: bold;
+}
+
+.add-customer,
+.add-bill {
+  margin-bottom: 30px;
+}
+
+.add-customer input,
+.add-bill input {
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+
 .search-bar {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
-.search-bar input,
-.search-bar select {
-  padding: 8px;
-  border: 1px solid #ccc;
+.customer-list,
+.bill-section {
+  margin-top: 20px;
+}
+
+.customer,
+.bill {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  background-color: #fafafa;
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 8px;
   border-radius: 5px;
 }
 
-.customer-list p {
-  text-align: center;
-  color: #777;
-  font-style: italic;
+.status {
+  color: white;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.status.active {
+  background-color: green;
+}
+
+.status.inactive {
+  background-color: red;
+}
+
+.history-section,
+.report-section {
+  margin-top: 30px;
+  padding: 15px;
+  background-color: #eef5ff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+#reportBox {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.history-item {
+  margin: 5px 0;
+  padding: 6px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.error {
+  color: red;
+  margin-top: 5px;
+}
+
+@media (max-width: 600px) {
+  .customer,
+  .bill {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .search-bar {
+    flex-direction: column;
+  }
 }
