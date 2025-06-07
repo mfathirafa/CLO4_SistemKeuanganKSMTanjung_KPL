@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
 
-      fetch(${API_BASE_URL}/login, {
+      fetch(`${API_BASE_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      fetch(${API_BASE_URL}/customers, {
+      fetch(`${API_BASE_URL}/customers`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -180,7 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      fetch(${API_BASE_URL}/bills, {
+      fetch(`${API_BASE_URL}/bills`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -247,7 +247,7 @@ function renderCustomers(list) {
   list.forEach((c) => {
     const div = document.createElement("div");
     div.className = "customer";
-    div.textContent = ${c.name} - ${c.phone || '-'};
+    div.textContent = `${c.name} - ${c.phone || '-'}`;
     container.appendChild(div);
   });
 }
@@ -255,7 +255,7 @@ function renderCustomers(list) {
 function loadCustomers() {
   if (!adminToken) return;
   
-  fetch(${API_BASE_URL}/customers, {
+  fetch(`${API_BASE_URL}/customers`, {
     headers: { Authorization: adminToken },
   })
     .then((res) => {
@@ -278,7 +278,7 @@ function loadCustomers() {
 function loadBills() {
   if (!adminToken) return;
   
-  fetch(${API_BASE_URL}/bills, {
+  fetch(`${API_BASE_URL}/bills`, {
     headers: { Authorization: adminToken },
   })
     .then((res) => {
@@ -313,7 +313,7 @@ function renderBills(bills) {
       <p><strong>Jumlah:</strong> Rp ${b.amount.toLocaleString('id-ID')}</p>
       <p><strong>Jatuh tempo:</strong> ${b.dueDate}</p>
       <p><strong>Status:</strong> ${b.status === 'paid' ? 'Terbayar' : 'Belum Terbayar'}</p>
-      ${b.status === 'unpaid' ? <button onclick="payBill(${b.id})">Bayar</button> : ''}
+      ${b.status === 'unpaid' ? `<button onclick="payBill(${b.id})">Bayar</button>` : ''}
     `;
     container.appendChild(div);
   });
@@ -323,7 +323,7 @@ function renderBills(bills) {
 function payBill(billId) {
   if (!adminToken) return;
   
-  fetch(${API_BASE_URL}/bills/${billId}, {
+  fetch(`${API_BASE_URL}/bills/${billId}`, {
     method: 'PATCH',
     headers: { Authorization: adminToken },
   })
