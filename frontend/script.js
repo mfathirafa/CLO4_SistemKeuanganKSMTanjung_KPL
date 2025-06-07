@@ -140,3 +140,96 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
   }
+
+  // Search Pelanggan
+  const searchBtn = document.getElementById("searchBtn");
+  if (searchBtn) {
+    searchBtn.addEventListener("click", () => {
+      const query = document.getElementById("searchInput").value.toLowerCase();
+      if (!query) {
+        renderCustomers(customers);
+        return;
+      }
+      // Perbaiki search - hanya search berdasarkan name dan phone
+      const filtered = customers.filter(
+        (c) =>
+          c.name.toLowerCase().includes(query) ||
+          (c.phone && c.phone.toLowerCase().includes(query))
+      );
+      renderCustomers(filtered);
+    });
+  }
+
+  // Load Bills
+  const loadBillsBtn = document.getElementById("loadBillsBtn");
+  if (loadBillsBtn) {
+    loadBillsBtn.addEventListener("click", loadBills);
+  }
+
+  // Add Bill
+  const addBillForm = document.getElementById("addBillForm");
+  if (addBillForm) {
+    addBillForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const customerId = parseInt(document.getElementById("billCustomerId").value);
+      const amount = parseFloat(document.getElementById("billAmount").value);
+      const dueDate = document.getElementById("billDueDate").value;
+
+      if (!customerId || !amount || !dueDate) {
+        alert("Semua field tagihan harus diisi");
+        return;
+      }
+
+      fetch(${API_BASE_URL}/bills, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: adminToken,
+        },
+        body: JSON.stringify({ customerId, amount, dueDate }),
+      })
+        .then((res) => {
+          if (!res.ok) {
+            return res.json().then(err => {
+              throw new Error(err.error || "Gagal menambahkan tagihan");
+            });
+          }
+          return res.json();
+        })
+        .then((data) => {
+          alert("Tagihan berhasil ditambahkan");
+          document.getElementById("billCustomerId").value = "";
+          document.getElementById("billAmount").value = "";
+          document.getElementById("billDueDate").value = "";
+        })
+        .catch((error) => {
+          console.error("Add bill error:", error);
+          alert(error.message || "Gagal tambah tagihan");
+        });
+    });
+  }
+
+  // Load History
+  const loadHistoryBtn = document.getElementById("loadHistoryBtn");
+  if (loadHistoryBtn) {
+    loadHistoryBtn.addEventListener("click", loadHistory);
+  }
+
+  // Download History (CSV)
+  const downloadHistoryBtn = document.getElementById("downloadHistoryBtn");
+  if (downloadHistoryBtn) {
+    downloadHistoryBtn.addEventListener("click", downloadHistoryCSV);
+  }
+
+  // Load Report
+  const loadReportBtn = document.getElementById("loadReportBtn");
+  if (loadReportBtn) {
+    loadReportBtn.addEventListener("click", loadReport);
+  }
+
+  // Download Report (TXT)
+  const downloadReportBtn = document.getElementById("downloadReportBtn");
+  if (downloadReportBtn) {
+    downloadReportBtn.addEventListener("click", downloadReportTXT);
+  }
+});
