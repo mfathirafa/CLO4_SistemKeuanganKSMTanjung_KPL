@@ -152,3 +152,104 @@ app.get("/bills", authMiddleware, (req, res) => {
       customerName: customer ? customer.name : "Unknown",
     };
   });
+
+  res.json(resultWithName);
+});
+
+app.patch("/bills/:id", authMiddleware, (req, res) => {
+  const id = parseInt(req.params.id);
+
+  if (isNaN(id)) {
+    return res.status(400).json({ error: "ID tagihan harus berupa angka." });
+  }
+
+  const bill = bills.find((b) => b.id === id);
+  if (!bill) {
+    return res.status(404).json({ error: "Tagihan tidak ditemukan." });
+  }
+
+  if (bill.status === "paid") {
+    return res.status(400).json({ error: "Tagihan sudah dibayar." });
+  }
+
+  bill.status = "paid";
+  res.json(bill);
+});
+
+// ------------------ REPORTS & HISTORY ------------------
+app.get("/reports", authMiddleware, (req, res) => {
+  const total = bills.length;
+  const paidBills = bills.filter((b) => b.status === "paid");
+  const unpaidBills = bills.filter((b) => b.status === "unpaid");
+  const totalPaidAmount = paidBills.reduce((sum, b) => sum + b.amount, 0);
+
+  res.json({
+    totalBills: total,
+    paidBills: paidBills.length,
+    unpaidBills: unpaidBills.length,
+    totalPaidAmount,
+    history: paidBills.map((b) => ({
+      ...b,
+      customerName: customers.find((c) => c.id === b.customerId)?.name || "Unknown"
+    })),
+  });
+});
+
+// TAMBAHAN ENDPOINT YANG HILANG:
+
+// Payment history endpoint
+app.get("/payments/history", authMiddleware, (req, res) => {
+  const paidBills = bills.filter((b) => b.status === "paid");
+  const history = paidBills.map((b) => {
+    const customer = customers.find((c) => c.id === b.customerId);
+    return {
+      customerId: b.customerId,
+      customerName: customer ? customer.name : "Unknown",
+      amount: b.amount,
+      date: b.dueDate, // atau bisa tambah field paymentDate
+      billId: b.id
+    };
+  });
+  res.json(history);
+});
+
+// Report endpoint (text format)
+app.get("/report", authMiddleware, (req, res) => {
+  const total = bills.length;
+  const paidBills = bills.filter((b) => b.status === "paid");
+  const unpaidBills = bills.filter((b) => b.status === "unpaid");
+  const totalPaidAmount = paidBills.reduce((sum, b) => sum + b.amount, 0);
+  const totalUnpaidAmount = unpaidBills.reduce((sum, b) => sum + b.amount, 0);
+
+  const reportText = `
+LAPORAN TAGIHAN
+===============
+
+Total Tagihan: ${total}
+Tagihan Terbayar: ${paidBills.length}
+Tagihan Belum Terbayar: ${unpaidBills.length}
+
+Total Jumlah Terbayar: Rp ${totalPaidAmount.toLocaleString('id-ID')}
+Total Jumlah Belum Terbayar: Rp ${totalUnpaidAmount.toLocaleString('id-ID')}
+
+DETAIL TAGIHAN TERBAYAR:
+${paidBills.length > 0 ? 
+  paidBills.map(b => {
+    const customer = customers.find(c => c.id === b.customerId);
+    return `- ${customer?.name || 'Unknown'}: Rp ${b.amount.toLocaleString('id-ID')} (${b.dueDate})`;
+  }).join('\n') 
+  : 'Tidak ada tagihan yang terbayar'}
+
+DETAIL TAGIHAN BELUM TERBAYAR:
+${unpaidBills.length > 0 ? 
+  unpaidBills.map(b => {
+    const customer = customers.find(c => c.id === b.customerId);
+    return `- ${customer?.name || 'Unknown'}: Rp ${b.amount.toLocaleString('id-ID')} (Jatuh tempo: ${b.dueDate})`;
+  }).join('\n') 
+  : 'Semua tagihan sudah terbayar'}
+  `;
+
+  res.type('text/plain').send(reportText.trim());
+});
+
+module.exports = app;
