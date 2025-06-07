@@ -1,7 +1,5 @@
-// Runtime Configuration (menggunakan variabel ENV fallback)
 const API_BASE_URL = window.API_BASE_URL || "http://localhost:3000";
 
-// Automata (State untuk pengelolaan status UI)
 const UIState = {
   IDLE: "idle",
   LOADING: "loading",
@@ -10,68 +8,135 @@ const UIState = {
 };
 
 let currentState = UIState.IDLE;
+let adminToken = localStorage.getItem("adminToken") || null;
+let customers = [];
+
+const loginSection = document.getElementById("login-section");
+const mainApp = document.getElementById("main-section");
+
+function showLoginOnly() {
+  loginSection.style.display = "block";
+  mainApp.style.display = "none";
+}
+
+function showMainApp() {
+  loginSection.style.display = "none";
+  mainApp.style.display = "block";
+  fillCustomerDropdown();
+}
+
 function setState(state) {
   currentState = state;
   console.log("State sekarang:", state);
-  // Di sini kamu bisa update UI tergantung statusnya
 }
 
-// Table-driven Construction (mapping filter logika)
-const filters = {
-  name: (item, keyword) => item.name.toLowerCase().includes(keyword),
-  phone: (item, keyword) => item.phone.toLowerCase().includes(keyword),
-  status: (item, status) => !status || item.status === status,
-};
-
-let customers = [];
+function fillCustomerDropdown() {
+  const select = document.getElementById("billCustomerId");
+  if (!select) return;
+  
+  select.innerHTML = '<option value="">Pilih pelanggan</option>';
+  customers.forEach((c) => {
+    const option = document.createElement("option");
+    option.value = c.id; // pastikan menggunakan c.id yang adalah number
+    option.textContent = c.name;
+    select.appendChild(option);
+  });
+}
 
 document.addEventListener("DOMContentLoaded", () => {
-  setState(UIState.LOADING);
-  fetch(`${API_BASE_URL}/customers`)
-    .then((res) => res.json())
-    .then((data) => {
-      customers.length = 0;
-      customers.push(...data);
-      renderCustomers(customers);
-      setState(UIState.SUCCESS);
-    })
-    .catch(() => setState(UIState.ERROR));
+  if (adminToken) {
+    showMainApp();
+    loadCustomers();
+  } else {
+    showLoginOnly();
+  }
 
-  document.getElementById("addCustomerBtn").addEventListener("click", () => {
-    const name = document.getElementById("customerName").value;
-    const phone = document.getElementById("customerPhone").value;
-    if (name && phone) {
-      setState(UIState.LOADING);
-      fetch(`${API_BASE_URL}/customers`, {
+  // Login form submit
+  const loginForm = document.getElementById("loginForm");
+  if (loginForm) {
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      fetch(${API_BASE_URL}/login, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Login gagal");
+          return res.json();
+        })
+        .then((data) => {
+          adminToken = data.token;
+          localStorage.setItem("adminToken", adminToken);
+          const errorElement = document.getElementById("loginError");
+          if (errorElement) errorElement.textContent = "";
+          showMainApp();
+          loadCustomers();
+        })
+        .catch((error) => {
+          console.error("Login error:", error);
+          const errorElement = document.getElementById("loginError");
+          if (errorElement) {
+            errorElement.textContent = "Login gagal. Cek username dan password.";
+          }
+        });
+    });
+  }
+
+  // Logout
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      adminToken = null;
+      localStorage.removeItem("adminToken");
+      showLoginOnly();
+    });
+  }
+
+  // Add Customer
+  const addCustomerForm = document.getElementById("addCustomerForm");
+  if (addCustomerForm) {
+    addCustomerForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("customerName").value.trim();
+      const phone = document.getElementById("customerPhone").value.trim();
+
+      if (!name || !phone) {
+        alert("Nama dan nomor HP harus diisi");
+        return;
+      }
+
+      fetch(${API_BASE_URL}/customers, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: adminToken,
+        },
         body: JSON.stringify({ name, phone }),
       })
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            return res.json().then(err => {
+              throw new Error(err.error || "Gagal menambahkan pelanggan");
+            });
+          }
+          return res.json();
+        })
         .then((data) => {
           customers.push(data);
           renderCustomers(customers);
+          fillCustomerDropdown();
           document.getElementById("customerName").value = "";
           document.getElementById("customerPhone").value = "";
-          setState(UIState.SUCCESS);
+          alert("Pelanggan berhasil ditambahkan");
         })
-        .catch(() => setState(UIState.ERROR));
-    } else {
-      alert("Nama dan nomor HP harus diisi!");
-    }
-  });
-
-  document.getElementById("searchBtn").addEventListener("click", () => {
-    const query = document.getElementById("searchInput").value.toLowerCase();
-    const status = document.getElementById("statusFilter").value;
-
-    const filteredData = customers.filter((item) => {
-      return (
-        filters.name(item, query) ||
-        filters.phone(item, query)
-      ) && filters.status(item, status);
+        .catch((error) => {
+          console.error("Add customer error:", error);
+          alert(error.message || "Gagal tambah pelanggan");
+        });
     });
-
-    renderCustomers(filteredData);
-  });
-});
+  }
