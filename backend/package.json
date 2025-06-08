@@ -1,13 +1,40 @@
 {
+  "name": "customer-manager-backend",
+  "version": "1.0.0",
+  "description": "Backend for managing customers",
+  "main": "server.js",
+  "license": "MIT",
+  "scripts": {
+  "start": "node server.js",
+  "test": "cross-env NODE_ENV=test jest --detectOpenHandles",
+  "test:coverage": "cross-env NODE_ENV=test jest --coverage --detectOpenHandles"
+  },
   "dependencies": {
-    "body-parser": "^2.2.0",
+    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
-    "express": "^5.1.0",
+    "express": "^4.18.2",
     "helmet": "^8.1.0"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "jest": "^29.7.0",
-    "nodemon": "^3.1.10",
-    "supertest": "^7.1.1"
+    "supertest": "^6.3.4"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "server.js",
+      "*.js",
+      "!node_modules/**",
+      "!coverage/**",
+      "!tests/**/*.test.js",
+      "!jest.config.js"
+    ],
+    "coverageReporters": [
+      "text",
+      "html",
+      "lcov"
+    ],
+    "coverageDirectory": "coverage"
   }
 }

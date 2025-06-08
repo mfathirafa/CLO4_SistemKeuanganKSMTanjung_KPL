@@ -252,4 +252,15 @@ ${unpaidBills.length > 0 ?
   res.type('text/plain').send(reportText.trim());
 });
 
+// Endpoint reset data untuk testing
+if (process.env.NODE_ENV === 'test') {
+  app.post('/__reset', (req, res) => {
+    customers = [];
+    bills = [];
+    billIdCounter = 1;
+    customerIdCounter = 1;
+    res.sendStatus(204);
+  });
+}
+
 module.exports = app;
