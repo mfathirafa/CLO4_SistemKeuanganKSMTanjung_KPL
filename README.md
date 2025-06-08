@@ -225,23 +225,6 @@ npm install
 npm start
 ```
 
-### Production
-Aplikasi dapat di-deploy ke:
-- **Heroku** - Node.js hosting
-- **Vercel** - Frontend hosting
-- **DigitalOcean** - VPS deployment
-- **AWS** - Cloud deployment
-
-## 🤝 Kontribusi
-
-Kontribusi sangat diterima! Silakan ikuti langkah berikut:
-
-1. Fork repository ini
-2. Buat branch baru (`git checkout -b feature/AmazingFeature`)
-3. Commit perubahan Anda (`git commit -m 'Add some AmazingFeature'`)
-4. Push ke branch (`git push origin feature/AmazingFeature`)
-5. Buat Pull Request
-
 ### Development Guidelines
 - Gunakan consistent coding style
 - Tulis commit messages yang jelas
@@ -251,13 +234,6 @@ Kontribusi sangat diterima! Silakan ikuti langkah berikut:
 ## 📝 License
 
 Proyek ini dibuat untuk keperluan akademik dalam mata kuliah Konstruksi Perangkat Lunak (KPL).
-
-## 📞 Support
-
-Jika Anda menemui masalah atau memiliki pertanyaan:
-- Buat **Issue** di repository ini
-- Hubungi tim pengembang melalui GitHub
-- Diskusi di **Pull Requests** untuk kontribusi
 
 ## 🔄 Changelog
 
